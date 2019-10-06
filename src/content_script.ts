@@ -7,7 +7,6 @@ const SIDE_ISSUE = "__side-issue";
 const SCROLLED_HEADER_HEIGHT = 60;
 
 const $ = e => document.querySelector(e);
-// @ts-ignore
 const $$ = e => document.querySelectorAll(e);
 
 const weights = {
@@ -92,8 +91,14 @@ const scrollToElement = (
 const lookFor = /^https:\/\/github.com\/.+\/.+\/issues\/\d+/;
 chrome.runtime.onMessage.addListener(msg => {
   const isIssue = lookFor.test(msg.url);
+  console.log(msg.url);
+  const alreadyMounted = $("#__issue-parent");
+  console.log(isIssue);
+  console.log(alreadyMounted);
   if (isIssue) {
-    main();
+    if (!alreadyMounted) {
+      main();
+    }
   } else {
     $("#__issue-parent").remove();
   }
@@ -165,6 +170,7 @@ const weigh = (elem: Element): number => {
     if (!reaction) {
       return all;
     }
+    // reactions with only 1 vote don't have text so we know it's 1 by default
     const [countStr] = reaction.textContent.match(/(\d+)/) || [1];
     const count = Number(countStr);
     const diff = weights[label] * count;
@@ -185,6 +191,13 @@ const createHeader = (count: number): Node => {
 };
 
 const main = () => {
+  console.log("main running");
+  // exclude original comment
+  // @ts-ignore
+  const comments = Array.from($$(REACTION_CLASS)).slice(1);
+  if (!comments.length) {
+    return;
+  }
   const appender = $(APPENDER_PARENT_CONTAINER);
   appender.insertAdjacentHTML("beforebegin", issueParent);
 
@@ -193,14 +206,12 @@ const main = () => {
   document.head.appendChild(style);
 
   const overlay = $("#__issue-parent");
-  // exclude original comment
-  // @ts-ignore
-  const comments = Array.from($$(REACTION_CLASS)).slice(1);
-  if (!comments.length) {
-    return;
-  }
 
   const relevantComments = comments.filter(hasReactions);
+
+  if (!relevantComments.length) {
+    return;
+  }
 
   const copies = relevantComments.map(createAppendableIssue) as Element[];
 
