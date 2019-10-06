@@ -6,6 +6,12 @@ Issue Inspector ranks each comment on issues by the reactions. Comments with man
 
 ## WIP
 
-This project is still a work in production and will be released as a chrome extension.
+This project is still a work in progress, the unlisted chrome extension can be downloaded from [here](https://chrome.google.com/webstore/detail/issue-inspector/jcekpjkpiblmimjfbejfdkngbmdgaeen)
+
+## TODO
+
+- [x] Show relevant comments in order
+- [ ] Add a button for collapsing the previews
+- [ ] Tweak the weights further
 
 ![typeorm](/assets/typeorm.png)
