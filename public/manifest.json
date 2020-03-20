@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name": "Issue Inspector",
   "description": "Preview the most upvoted comments for github issues without scrolling",
-  "version": "1.1",
+  "version": "3.0.1",
   "options_ui": {
     "page": "options.html",
     "chrome_style": true
@@ -18,11 +18,10 @@
     {
       "matches": ["https://github.com/*"],
       "run_at": "document_end",
-      "js": ["js/content_script.js"],
-      "css": ["style.css"]
+      "js": ["js/content_script.js"]
     }
   ],
-  "web_accessible_resources": ["*.png", "style.css"],
+  "web_accessible_resources": ["*.png"],
   "background": {
     "scripts": ["js/background.js"]
   },
