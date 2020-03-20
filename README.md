@@ -17,4 +17,4 @@ This project is still a work in progress, the unlisted chrome extension can be d
 
 ![static](assets/issue-inspector-preview.png)
 
-![animated](assets/preview.webm)
+![animated](assets/preview.gif)
