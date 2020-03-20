@@ -18,11 +18,13 @@
     {
       "matches": ["https://github.com/*"],
       "run_at": "document_end",
-      "js": ["js/content_script.js"]
+      "js": ["js/content_script.js"],
+      "css": ["style.css"]
     }
   ],
+  "web_accessible_resources": ["*.png", "style.css"],
   "background": {
     "scripts": ["js/background.js"]
   },
-  "permissions": ["webNavigation"]
+  "permissions": ["webNavigation", "storage"]
 }

@@ -6,8 +6,14 @@ const APPENDER_PARENT_CONTAINER = "#js-repo-pjax-container";
 const SIDE_ISSUE = "__side-issue";
 const SCROLLED_HEADER_HEIGHT = 60;
 
-const $ = e => document.querySelector(e);
-const $$ = e => document.querySelectorAll(e);
+const selectAll = (e: Element | Document) => (
+  query: string
+): NodeListOf<Element> => e.querySelectorAll(query);
+const select = (e: Element | Document) => (query: string): Element =>
+  e.querySelector(query);
+
+const $ = select(document);
+const $$ = selectAll(document);
 
 const weights = {
   THUMBS_UP: 1,
@@ -20,55 +26,13 @@ const weights = {
 
 const reactionLabels = Object.keys(weights);
 
-const toggleButton = (count: number) =>
-  `<span class="Box-body __issue-header">Showing ${count} solutions</span>`;
-
-const globalStyle = `
-  .${SIDE_ISSUE}.timeline-comment--caret:after, .${SIDE_ISSUE}.timeline-comment--caret:before {
-      content: none !important;
-  }
-  .${SIDE_ISSUE} .comment-body {
-      max-height: 150px;
-      overflow: hidden;
-  }
-  .${SIDE_ISSUE} {
-      width: 20vw;
-      z-index: 50;
-      margin-bottom: 15px;
-      cursor: pointer;
-      transition: ease-in-out 0.3s;
-  }
-  .${SIDE_ISSUE}:hover {
-    box-shadow: 3px 3px 12px;
-    transform: translateY(-8px);
-  }
-  .__issue-header {
-      width: 20vw;
-      margin-bottom: 15px;
-  }
-  .__hidden_issue {
-      display: none;
-  }
-  @keyframes shadow-pulse {
-    0% {
-        box-shadow: 0 0 0 0px rgba(0, 0, 0, 0.2);
-    }
-    100% {
-        box-shadow: 0 0 0 35px rgba(0, 0, 0, 0);
-    }
-  }
-`;
-
 const issueParent = `
-    <div id="__issue-parent" style="
-        width: 100%;
-        top: 200px;
-        padding-right: 10px;
-        position: absolute;
-        display: flex;
-        align-items: flex-end;
-        flex-direction: column;
-    ">
+    <div id="__issue-parent">
+      <span class="__issue-header" id="__issue-header">
+        <div id="__issue-toggle-wrapper" title="Toggle issue visibility">
+        </div>
+      </span>
+      <div id="__issue-wrapper"></div>
     </div>
 `;
 
@@ -91,10 +55,7 @@ const scrollToElement = (
 const lookFor = /^https:\/\/github.com\/.+\/.+\/issues\/\d+/;
 chrome.runtime.onMessage.addListener(msg => {
   const isIssue = lookFor.test(msg.url);
-  console.log(msg.url);
   const alreadyMounted = $("#__issue-parent");
-  console.log(isIssue);
-  console.log(alreadyMounted);
   if (isIssue) {
     if (!alreadyMounted) {
       main();
@@ -105,63 +66,49 @@ chrome.runtime.onMessage.addListener(msg => {
 });
 
 const createAppendableIssue = (html: Element): Node => {
-  // I don't know why I have to do so many ts-ignores here lol
-  const copy = html.cloneNode(true);
-  // @ts-ignore
+  const copy = html.cloneNode(true) as Element;
   copy.classList.add(SIDE_ISSUE);
-  // @ts-ignore
-  const body = copy.querySelector("td.comment-body");
-  // @ts-ignore
+  const $c = select(copy);
+  const body = $c("td.comment-body");
   const children = Array.from(body.childNodes).slice(0, 5);
   body.innerHTML = "";
   children.forEach(child => body.appendChild(child));
 
-  // @ts-ignore
-  const author = copy.querySelector(".author").textContent;
-  // @ts-ignore
-  copy.querySelector(".timeline-comment-header-text").innerHTML = author;
-  // @ts-ignore
-  const label = copy.querySelector(".timeline-comment-label");
+  const author = $c(".author").textContent;
+  $c(".timeline-comment-header-text").innerHTML = author;
+  const label = $c(".timeline-comment-label");
   if (label) {
-    // @ts-ignore
     label.remove();
   }
-  // @ts-ignore
-  copy.querySelector(".timeline-comment-action").remove();
-  // @ts-ignore
-  copy.querySelector(".timeline-comment-actions").remove();
-  const summary = copy
-    // @ts-ignore
-    .querySelector("summary.add-reaction-btn");
+  $c(".timeline-comment-action").remove();
+  $c(".timeline-comment-actions").remove();
+  const summary = $c("summary.add-reaction-btn");
   if (summary) summary.remove();
-  const details = copy
-    // @ts-ignore
-    .querySelector("details.details-overlay");
-  if (details) details.remove();
-  // @ts-ignore
-  copy.onclick = () => {
+  const details = $c("details.details-overlay");
+  if (details) {
+    details.remove();
+  }
+  copy.addEventListener("click", () => {
     if (!html.querySelector(".__back-top-btn")) {
       const target = html.querySelector(".comment-reactions-options");
       const back = document.createElement("button");
       back.classList.add("btn-link", "reaction-summary-item", "__back-top-btn");
       back.textContent = "Jump back";
-      back.onclick = () => {
+      back.addEventListener("click", () => {
         scrollToElement(copy as Element);
-        // @ts-ignore
-        // html.style.animation = "shadow-pulse 1s infinite";
-      };
+      });
       target.appendChild(back);
     }
     scrollToElement(html);
-  };
+  });
   return copy;
 };
 
 const hasReactions = (elem: HTMLElement) =>
-  elem.querySelector(REACTIONS_PARENT_CLASS) !== null;
+  select(elem)(REACTIONS_PARENT_CLASS) !== null;
 
 const reactions = (elem: HTMLElement) =>
-  elem.querySelectorAll(`${REACTIONS_PARENT_CLASS} > button`);
+  select(elem)(`${REACTIONS_PARENT_CLASS} > button`);
 
 const weigh = (elem: Element): number => {
   return reactionLabels.reduce((all, label) => {
@@ -179,33 +126,26 @@ const weigh = (elem: Element): number => {
 };
 
 const createHeader = (count: number): Node => {
-  const div = document.createElement("div");
-  div.classList.add("Box-body", "__issue-header");
-  div.innerText = `Showing ${count} popular comments`;
-  div.addEventListener("mousedown", () => {
-    $$(SIDE_ISSUE).forEach(issue => {
-      issue.classList.toggle("__hidden-issue");
-    });
+  const img = document.createElement("img");
+  img.src = chrome.extension.getURL("magnifying_glass.png");
+  img.classList.add("__issue-toggle");
+  $("#__issue-toggle-wrapper").addEventListener("click", () => {
+    console.log("clicked");
+    $("#__issue-toggle-wrapper").classList.toggle("__hidden-toggle");
+    $(`#__issue-wrapper`).classList.toggle("__hidden-issue");
   });
-  return div;
+  return img;
 };
 
 const main = () => {
   console.log("main running");
   // exclude original comment
-  // @ts-ignore
   const comments = Array.from($$(REACTION_CLASS)).slice(1);
   if (!comments.length) {
     return;
   }
   const appender = $(APPENDER_PARENT_CONTAINER);
   appender.insertAdjacentHTML("beforebegin", issueParent);
-
-  const style = document.createElement("style");
-  style.innerHTML = globalStyle;
-  document.head.appendChild(style);
-
-  const overlay = $("#__issue-parent");
 
   const relevantComments = comments.filter(hasReactions);
 
@@ -216,7 +156,8 @@ const main = () => {
   const copies = relevantComments.map(createAppendableIssue) as Element[];
 
   const header = createHeader(relevantComments.length);
-  overlay.appendChild(header);
+  $("#__issue-toggle-wrapper").appendChild(header);
+  const wrapper = $("#__issue-wrapper");
   copies.sort((a, b) => weigh(b) - weigh(a));
-  copies.forEach(copy => overlay.appendChild(copy));
+  copies.forEach(copy => wrapper.appendChild(copy));
 };

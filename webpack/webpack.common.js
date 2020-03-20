@@ -7,6 +7,7 @@ module.exports = {
     entry: {
         content_script: path.join(__dirname, srcDir + 'content_script.ts'),
         background: path.join(__dirname, srcDir + 'background.ts')
+        // style: path.join(__dirname, srcDir + 'style.css')
     },
     output: {
         path: path.join(__dirname, '../dist/js'),
@@ -28,7 +29,7 @@ module.exports = {
         ]
     },
     resolve: {
-        extensions: ['.ts', '.tsx', '.js']
+        extensions: ['.ts', '.tsx', '.js', '.css']
     },
     plugins: [
         // exclude locale files in moment
