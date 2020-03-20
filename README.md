@@ -11,7 +11,8 @@ This project is still a work in progress, the unlisted chrome extension can be d
 ## TODO
 
 - [x] Show relevant comments in order
-- [ ] Add a button for collapsing the previews
+- [x] Add a button for collapsing the previews
 - [ ] Tweak the weights further
+- [ ] Add persistence for visibility toggle?
 
 ![typeorm](/assets/typeorm.png)

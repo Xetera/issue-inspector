@@ -1,7 +1,7 @@
 const REACTIONS_PARENT_CLASS = ".comment-reactions-options";
 const REACTION_CLASS = ".timeline-comment";
-const HEADER_CLASS = ".gh-header-actions";
 const APPENDER_PARENT_CONTAINER = "#js-repo-pjax-container";
+import "./style.css";
 
 const SIDE_ISSUE = "__side-issue";
 const SCROLLED_HEADER_HEIGHT = 60;
