@@ -15,4 +15,6 @@ This project is still a work in progress, the unlisted chrome extension can be d
 - [ ] Tweak the weights further
 - [ ] Add persistence for visibility toggle?
 
-![typeorm](/assets/typeorm.png)
+![static](assets/issue-inspector-preview.png)
+
+![animated](assets/preview.webm)
