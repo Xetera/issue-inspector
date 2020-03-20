@@ -68,6 +68,9 @@ chrome.runtime.onMessage.addListener(msg => {
 const createAppendableIssue = (html: Element): Node => {
   const copy = html.cloneNode(true) as Element;
   copy.classList.add(SIDE_ISSUE);
+  const overlay = document.createElement("div");
+  overlay.classList.add("__issue-reaction-overlay");
+  copy.appendChild(overlay);
   const $c = select(copy);
   const body = $c("td.comment-body");
   const children = Array.from(body.childNodes).slice(0, 5);
