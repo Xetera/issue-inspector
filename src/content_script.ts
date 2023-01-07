@@ -1,4 +1,4 @@
-const REACTIONS_PARENT_CLASS = ".user-has-reacted";
+const REACTIONS_PARENT_CLASS = ".js-comment-reactions-options";
 const REACTION_CLASS = ".timeline-comment";
 const APPENDER_PARENT_CONTAINER = "#js-repo-pjax-container";
 import "./style.css";
@@ -87,7 +87,7 @@ const createAppendableIssue = (html: Element): Node => {
     label.remove();
   }
   // $c(".timeline-comment-action").remove();
-  $c(".new-reactions-dropdown").remove();
+  $c(".new-reactions-dropdown")?.remove();
   const summary = $c("summary.add-reaction-btn");
   if (summary) summary.remove();
   const details = $c("details.details-overlay");
@@ -96,7 +96,7 @@ const createAppendableIssue = (html: Element): Node => {
   }
   copy.addEventListener("click", () => {
     if (!html.querySelector(".__back-top-btn")) {
-      const target = html.querySelector(".comment-reactions-options");
+      const target = html.querySelector(REACTIONS_PARENT_CLASS);
       const back = document.createElement("button");
       back.classList.add("btn-link", "reaction-summary-item", "__back-top-btn");
       back.textContent = "Jump back";
@@ -111,7 +111,7 @@ const createAppendableIssue = (html: Element): Node => {
 };
 
 const hasReactions = (elem: HTMLElement) =>
-  select(elem)(REACTIONS_PARENT_CLASS) !== null;
+  select(elem)(".social-reaction-summary-item") !== null;
 
 const reactions = (elem: HTMLElement) =>
   select(elem)(`${REACTIONS_PARENT_CLASS} > button`);
@@ -138,25 +138,30 @@ const createHeader = (count: number): Node => {
   $("#__issue-toggle-wrapper").addEventListener("click", () => {
     console.log("clicked");
     $("#__issue-toggle-wrapper").classList.toggle("__hidden-toggle");
-    $(`#__issue-wrapper`).classList.toggle("__hidden-issue");
+    $("#__issue-wrapper").classList.toggle("__hidden-issue");
   });
   return img;
 };
 
 const main = () => {
-  console.log("main running");
+  if (!window.location.pathname.match(/\issues\//)) {
+    return;
+  }
   // exclude original comment
   const comments = Array.from($$(REACTION_CLASS)).slice(1);
+
   if (!comments.length) {
+    console.debug("Could not find any comments on the issue");
     return;
   }
   const appender = $(APPENDER_PARENT_CONTAINER);
   appender.insertAdjacentHTML("beforebegin", issueParent);
 
+  console.log(comments);
   const relevantComments = comments.filter(hasReactions);
   console.log(relevantComments);
 
-  if (!relevantComments.length) {
+  if (relevantComments.length === 0) {
     console.debug("Could not find any comments to highlight");
     return;
   }
