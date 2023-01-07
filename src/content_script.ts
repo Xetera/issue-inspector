@@ -1,4 +1,4 @@
-const REACTIONS_PARENT_CLASS = ".comment-reactions-options";
+const REACTIONS_PARENT_CLASS = ".user-has-reacted";
 const REACTION_CLASS = ".timeline-comment";
 const APPENDER_PARENT_CONTAINER = "#js-repo-pjax-container";
 import "./style.css";
@@ -6,11 +6,14 @@ import "./style.css";
 const SIDE_ISSUE = "__side-issue";
 const SCROLLED_HEADER_HEIGHT = 60;
 
-const selectAll = (e: Element | Document) => (
-  query: string
-): NodeListOf<Element> => e.querySelectorAll(query);
-const select = (e: Element | Document) => (query: string): Element =>
-  e.querySelector(query);
+const selectAll =
+  (e: Element | Document) =>
+  (query: string): NodeListOf<Element> =>
+    e.querySelectorAll(query);
+const select =
+  (e: Element | Document) =>
+  (query: string): Element =>
+    e.querySelector(query);
 
 const $ = select(document);
 const $$ = selectAll(document);
@@ -21,7 +24,7 @@ const weights = {
   HEART: 0.7,
   ROCKET: 0.5,
   CONFUSED: 0.1,
-  THUMBS_DOWN: -1
+  THUMBS_DOWN: -1,
 };
 
 const reactionLabels = Object.keys(weights);
@@ -48,12 +51,12 @@ const scrollToElement = (
   const { pageYOffset } = window;
   window.scrollTo({
     top: destination + pageYOffset - SCROLLED_HEADER_HEIGHT,
-    ...opts
+    ...opts,
   });
 };
 
 const lookFor = /^https:\/\/github.com\/.+\/.+\/issues\/\d+/;
-chrome.runtime.onMessage.addListener(msg => {
+chrome.runtime.onMessage.addListener((msg) => {
   const isIssue = lookFor.test(msg.url);
   const alreadyMounted = $("#__issue-parent");
   if (isIssue) {
@@ -75,16 +78,16 @@ const createAppendableIssue = (html: Element): Node => {
   const body = $c("td.comment-body");
   const children = Array.from(body.childNodes).slice(0, 5);
   body.innerHTML = "";
-  children.forEach(child => body.appendChild(child));
+  children.forEach((child) => body.appendChild(child));
 
   const author = $c(".author").textContent;
-  $c(".timeline-comment-header-text").innerHTML = author;
+  $c(".timeline-comment-header").innerHTML = author;
   const label = $c(".timeline-comment-label");
   if (label) {
     label.remove();
   }
-  $c(".timeline-comment-action").remove();
-  $c(".timeline-comment-actions").remove();
+  // $c(".timeline-comment-action").remove();
+  $c(".new-reactions-dropdown").remove();
   const summary = $c("summary.add-reaction-btn");
   if (summary) summary.remove();
   const details = $c("details.details-overlay");
@@ -151,8 +154,10 @@ const main = () => {
   appender.insertAdjacentHTML("beforebegin", issueParent);
 
   const relevantComments = comments.filter(hasReactions);
+  console.log(relevantComments);
 
   if (!relevantComments.length) {
+    console.debug("Could not find any comments to highlight");
     return;
   }
 
@@ -162,5 +167,5 @@ const main = () => {
   $("#__issue-toggle-wrapper").appendChild(header);
   const wrapper = $("#__issue-wrapper");
   copies.sort((a, b) => weigh(b) - weigh(a));
-  copies.forEach(copy => wrapper.appendChild(copy));
+  copies.forEach((copy) => wrapper.appendChild(copy));
 };
